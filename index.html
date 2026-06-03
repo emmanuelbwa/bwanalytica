@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bluewolf Analytica | Autonomous Proprietary Trading</title>
+    
+    <!-- FAVICON (Browser Tab Logo) -->
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dvnahlsra/image/upload/v1752672692/bwalogo_zgrjjk.png">
+    <link rel="apple-touch-icon" href="https://res.cloudinary.com/dvnahlsra/image/upload/v1752672692/bwalogo_zgrjjk.png">
+    
+    <!-- Import Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Import Chart.js for Institutional Graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* DESIGN SYSTEM VARIABLES */
+        :root {
+            --bg-pure: #FFFFFF;
+            --bg-alt: #F8F9FA;
+            --text-main: #1A1A1A;
+            --text-light: #555555;
+            --accent: #0CBABA; /* Turquoise Blue */
+            --accent-hover: #099999;
+            --hero-blue: #6BAED6; /* Premium Finance Blue */
+        }
+
+        /* RESET & BASE STYLES */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-pure);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        h1, h2, h3 {
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        a {
+            text-decoration: none;
+            color: var(--accent);
+            transition: color 0.3s;
+        }
+
+        /* NAVIGATION */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 5%; 
+            z-index: 1000;
+            border-bottom: 1px solid #EAEAEA;
+        }
+
+        /* LOGO STYLING */
+        .logo-img {
+            height: 80px;
+            width: auto;
+            display: block;
+        }
+
+        .nav-links a {
+            margin-left: 2rem;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        /* HERO SECTION WITH DYNAMIC CANVAS */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 5%;
+            position: relative;
+            background-color: var(--bg-pure);
+            overflow: hidden; /* Ensures canvas doesn't spill over */
+        }
+
+        /* Canvas background styling */
+        #hero-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0; /* Sits behind text */
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+            z-index: 1; /* Sits on top of canvas */
+            position: relative;
+            /* Layered Shadow: Tight white halo to block lines + soft grey drop-shadow for 3D pop */
+            text-shadow: 
+                0px 0px 15px rgba(255, 255, 255, 1), 
+                0px 0px 30px rgba(255, 255, 255, 0.8),
+                0px 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-main); 
+            max-width: 800px;
+            margin-bottom: 2.5rem;
+            z-index: 1; 
+            position: relative;
+            font-weight: 500;
+            /* Softer version of the layered shadow for the paragraph */
+            text-shadow: 
+                0px 0px 10px rgba(255, 255, 255, 1), 
+                0px 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 1rem;
+            z-index: 1; /* Sits on top of canvas */
+            position: relative;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.05); /* Subtle shadow on buttons to match */
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: var(--bg-pure);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(12, 186, 186, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-pure); 
+            color: var(--accent);
+            border: 2px solid var(--accent);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--accent);
+            color: var(--bg-pure);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(12, 186, 186, 0.2);
+        }
+
+        /* SECTIONS COMMON */
+        section {
+            padding: 6rem 5%;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        /* THE EDGE (FEATURES) */
+        .edge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .edge-card {
+            padding: 2rem;
+            background: var(--bg-alt);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .edge-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .edge-card p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        /* ABOUT SECTION */
+        .about {
+            background-color: var(--text-main);
+            color: var(--bg-pure);
+        }
+
+        .about .section-title {
+            color: var(--bg-pure);
+        }
+
+        .about-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            font-size: 1.15rem;
+            font-weight: 300;
+            color: #CCCCCC;
+        }
+
+        .about-content p {
+            margin-bottom: 1.5rem;
+        }
+
+        /* ARCHITECTURE (TIMELINE WITH ANIMATIONS) */
+        .architecture {
+            background-color: var(--bg-alt);
+            overflow: hidden;
+        }
+
+        .timeline {
+            max-width: 800px;
+            margin: 0 auto;
+            border-left: 2px solid var(--accent);
+            padding-left: 2rem;
+        }
+
+        .timeline-block {
+            margin-bottom: 3rem;
+            position: relative;
+            /* Scroll Reveal Starting State */
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s ease-out;
+        }
+
+        /* Class added via Javascript on scroll */
+        .timeline-block.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Pulse Animation for the Dots */
+        @keyframes pulseNode {
+            0% { box-shadow: 0 0 0 0 rgba(12, 186, 186, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(12, 186, 186, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(12, 186, 186, 0); }
+        }
+
+        .timeline-block::before {
+            content: '';
+            position: absolute;
+            left: -2.45rem;
+            top: 0;
+            width: 1rem;
+            height: 1rem;
+            background-color: var(--bg-pure);
+            border: 3px solid var(--accent);
+            border-radius: 50%;
+            /* Apply continuous pulse */
+            animation: pulseNode 2s infinite;
+        }
+
+        .timeline-block h3 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        .timeline-block p {
+            color: var(--text-light);
+        }
+
+        /* RESEARCH SECTION */
+        .research-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .research-card {
+            border: 1px solid #EAEAEA;
+            border-radius: 8px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            background: var(--bg-pure);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .research-card:hover {
+            box-shadow: 0 10px 30px rgba(107, 174, 214, 0.15);
+            border-color: var(--hero-blue);
+            transform: translateY(-5px); /* Added subtle lift on hover */
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--hero-blue);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .research-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .research-card p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .read-more-btn {
+            margin-top: auto;
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .read-more-btn:hover {
+            color: var(--accent-hover);
+            text-decoration: underline;
+        }
+
+        /* MODAL STYLES */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--bg-pure);
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            border-radius: 8px;
+            padding: 3rem;
+            position: relative;
+            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--text-light);
+            cursor: pointer;
+            line-height: 1;
+            z-index: 10;
+        }
+
+        .modal-close:hover {
+            color: var(--text-main);
+        }
+
+        .modal-body h2 {
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .modal-body p {
+            margin-bottom: 1.5rem;
+            color: var(--text-light);
+        }
+
+        /* MATH TYPOGRAPHY FOR REPORTS */
+        .math-block {
+            font-family: 'JetBrains Mono', monospace;
+            background: #F3F4F6;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin: 1.5rem 0;
+            border-left: 3px solid var(--accent);
+        }
+
+        .math-inline {
+            font-family: 'JetBrains Mono', monospace;
+            font-style: italic;
+            font-size: 0.95em;
+            background: #F3F4F6;
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+        }
+
+        /* CHART CONTAINER STYLING */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin: 2.5rem 0;
+            padding: 1.5rem;
+            background: var(--bg-alt);
+            border-radius: 8px;
+            border: 1px solid #EAEAEA;
+        }
+
+        /* FOOTER */
+        footer {
+            background-color: var(--text-main);
+            color: white;
+            padding: 4rem 5% 2rem;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            max-width: 1200px;
+            margin: 0 auto 2rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 2rem;
+        }
+
+        .footer-brand p {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .footer-links a {
+            color: #CCCCCC;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent);
+        }
+
+        .disclaimer {
+            font-size: 0.75rem;
+            color: #666;
+            text-align: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .nav-links { display: none; }
+            .btn-container { flex-direction: column; width: 100%; max-width: 300px; }
+            .footer-content { flex-direction: column; gap: 2rem; }
+            .modal-content { padding: 2rem; }
+            .chart-container { padding: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVIGATION WITH LOGO -->
+    <nav>
+        <div class="logo">
+            <a href="#"><img src="https://res.cloudinary.com/dvnahlsra/image/upload/v1752672692/bwalogo_zgrjjk.png" alt="Bluewolf Analytica" class="logo-img"></a>
+        </div>
+        <div class="nav-links">
+            <a href="#about">About</a>
+            <a href="#architecture">Architecture</a>
+            <a href="#research">Research</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <header class="hero" id="hero-section">
+        <!-- DYNAMIC CANVAS LAYER -->
+        <canvas id="hero-canvas"></canvas>
+        
+        <h1>Autonomous Intelligence.<br>Absolute Precision.</h1>
+        <p>Bluewolf Analytica is an AI-native proprietary trading firm. We deploy a fully autonomous, multi-agent architecture to navigate global long/short equity markets.</p>
+        <div class="btn-container">
+            <a href="#architecture" class="btn btn-primary">Explore the Architecture</a>
+            <a href="#research" class="btn btn-secondary">Read Latest Reports</a>
+        </div>
+    </header>
+
+    <!-- THE EDGE (FEATURES) -->
+    <section class="edge">
+        <div class="edge-grid">
+            <div class="edge-card">
+                <h3>Infinite Context Window</h3>
+                <p>Our agents ingest, filter, and analyze market data, SEC filings, and global sentiment at a scale and speed unattainable by traditional analysts.</p>
+            </div>
+            <div class="edge-card">
+                <h3>Algorithmic Objectivity</h3>
+                <p>Removing human fatigue and cognitive bias from the decision matrix. Pure, probability-driven portfolio construction.</p>
+            </div>
+            <div class="edge-card">
+                <h3>Dynamic Execution</h3>
+                <p>Continuous, micro-adjusted position sizing and execution strategies that adapt to market microstructure in real-time.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ABOUT SECTION -->
+    <section id="about" class="about">
+        <h2 class="section-title">Beyond Human Cognitive Limits.</h2>
+        <div class="about-content">
+            <p>The modern financial market is a landscape of infinite data. Traditional funds rely on human analysts who are limited by reading speed, fatigue, and inherent biases. Bluewolf Analytica was founded on a singular premise: human cognition is no longer the optimal engine for alpha generation.</p>
+            <p>We are not just a trading firm; we are an artificial intelligence laboratory applied to finance. By utilizing swarms of agentic AI systems and reinforcement learning, our human founders have stepped away from the trading desk.</p>
+            <p>Today, we serve exclusively as the architects. We build, refine, and monitor the autonomous agents that execute the entirety of our long/short equity strategy.</p>
+        </div>
+    </section>
+
+    <!-- ARCHITECTURE SECTION -->
+    <section id="architecture" class="architecture">
+        <h2 class="section-title">The Agentic Workflow.</h2>
+        <div class="timeline">
+            <!-- Timeline Block 1 -->
+            <div class="timeline-block">
+                <h3>1. Discovery Agents</h3>
+                <p>Our research tier continuously monitors global equities. Discovery Agents transcribe live earnings calls, parse regulatory filings, evaluate supply chain shifts, and gauge real-time news sentiment. They distill market noise into high-conviction insights.</p>
+            </div>
+            <!-- Timeline Block 2 -->
+            <div class="timeline-block">
+                <h3>2. Strategy Agents</h3>
+                <p>Insights are passed to the Strategy layer. Operating without emotional bias, these agents calculate probabilities, assess macro-economic risk factors, and construct a market-neutral long/short portfolio, determining the alpha thesis for every position.</p>
+            </div>
+            <!-- Timeline Block 3 -->
+            <div class="timeline-block">
+                <h3>3. Execution Agents</h3>
+                <p>Once a thesis is approved, Execution Agents interface directly with our prime brokerage. They break down block trades, optimize for minimal market impact and slippage, and dynamically hedge the portfolio against sudden volatility spikes.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- RESEARCH SECTION -->
+    <section id="research" class="research">
+        <h2 class="section-title">Agent Generated Reports.</h2>
+        <div class="research-grid">
+            
+            <!-- Report Card 1 -->
+            <div class="research-card">
+                <span class="tag">Generated by Discovery Agent v2.3</span>
+                <h3>Geopolitical Alpha: Prolonged Closure of the Strait of Hormuz</h3>
+                <p>An agentic probability model mapping the cascading stagflationary effects of a Middle Eastern maritime choke-point closure across global equity sectors.</p>
+                <button class="read-more-btn" onclick="openModal('article-1')">Read Report →</button>
+            </div>
+
+            <!-- Report Card 2 -->
+            <div class="research-card">
+                <span class="tag">Generated by Strategy Agent v4.0</span>
+                <h3>Agentic Mean-Variance: Orthogonal Assets & Stochastic Drift</h3>
+                <p>A rigorous quantitative breakdown of how Bluewolf agents construct dynamic expected utility vectors, injecting real-time drift into the Markowitz optimization framework.</p>
+                <button class="read-more-btn" onclick="openModal('article-2')">Read Report →</button>
+            </div>
+
+            <!-- Report Card 3 -->
+            <div class="research-card">
+                <span class="tag">Generated by Discovery Agent v3.1</span>
+                <h3>Predictive Alpha: Scraping Academic Footprints for FDA Trial Outcomes</h3>
+                <p>Utilizing alternative data—from bioinformatics GitHub commits to academic embargoes—to predict Phase 3 biotech trial results weeks before public readouts.</p>
+                <button class="read-more-btn" onclick="openModal('article-3')">Read Report →</button>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer id="contact">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <p>Autonomous Proprietary Trading.</p>
+                <br>
+                <p><a href="mailto:relations@bwanalytica.com.ng" style="color: var(--accent);">relations@bwanalytica.com.ng</a></p>
+            </div>
+            <div class="footer-links">
+                <a href="#about">About Us</a>
+                <a href="#architecture">Our Architecture</a>
+                <a href="#research">Research & Insights</a>
+            </div>
+        </div>
+        <div class="disclaimer">
+            <p>© 2026 Bluewolf Analytica. All Rights Reserved.</p>
+            <br>
+            <p>Regulatory Disclaimer: Bluewolf Analytica is a proprietary trading firm. We trade exclusively with the firm's own capital and nothing on this website should be construed as an offer to sell or a solicitation of an offer to buy any securities. All research published on this site is for informational and educational purposes only and does not constitute financial advice.</p>
+        </div>
+    </footer>
+
+
+    <!-- ==========================================
+         MODALS (EXPANDED ARTICLES) START HERE
+         ========================================== -->
+
+    <!-- Modal 1: Strait of Hormuz -->
+    <div id="article-1" class="modal-overlay" onclick="closeModalOnOutsideClick(event, 'article-1')">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('article-1')">&times;</button>
+            <div class="modal-body">
+                <span class="tag">Generated by Discovery Agent v2.3 | Macro-Risk Division</span>
+                <h2>Geopolitical Alpha: Prolonged Closure of the Strait of Hormuz</h2>
+                
+                <div style="background-color: var(--bg-alt); padding: 1.5rem; border-left: 4px solid var(--accent); border-radius: 4px; margin-bottom: 2rem; margin-top: 1rem;">
+                    <p style="margin-bottom: 0; color: var(--text-main);"> A complete, extended shutdown of the Strait of Hormuz – through which roughly 20% of the world’s oil and LNG flows – would cause an unprecedented global supply shock. Almost immediately, oil prices would spike (Brent crude already jumped to ~$117 in April 2026, briefly touching $138/bbl) with knock-on effects on fuel and commodity prices. Central banks would face renewed inflationary pressure, and many industries would see profit margins squeezed. Regions and sectors most exposed to Middle East imports would suffer steep economic hits. In contrast, energy producers outside the region would gain a windfall.</p>
+                </div>
+
+                <h3 style="margin-bottom: 1rem; margin-top: 2rem; border-bottom: 1px solid #EAEAEA; padding-bottom: 0.5rem;">Macro Shockwave and Price Spike</h3>
+                <p><strong>Immediate Supply Crunch:</strong> With ~90% of Persian Gulf oil exports halted, markets face a severe shortage. Traders have already witnessed the fastest oil price surge in recent history. Stockpiles are dwindling, so even minor disruptions now translate to large price moves. Models project Brent could test $120–130 within weeks of a full closure.</p>
+                
+                <h3 style="margin-bottom: 1rem; margin-top: 2rem; border-bottom: 1px solid #EAEAEA; padding-bottom: 0.5rem;">Sector Impacts</h3>
+                <div class="chart-container">
+                    <canvas id="sectorChart"></canvas>
+                </div>
+
+                <h3 style="margin-bottom: 1rem; margin-top: 2rem; border-bottom: 1px solid #EAEAEA; padding-bottom: 0.5rem;">Price Evolution and Recovery Scenario</h3>
+                <div class="chart-container">
+                    <canvas id="hormuzChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Math-Heavy Optimization -->
+    <div id="article-2" class="modal-overlay" onclick="closeModalOnOutsideClick(event, 'article-2')">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('article-2')">&times;</button>
+            <div class="modal-body">
+                <span class="tag">Generated by Strategy Agent v4.0 | Quantitative Execution Division</span>
+                <h2>Agentic Mean-Variance Optimization: Orthogonal Asset Generation & Stochastic Drift</h2>
+                
+                <div style="background-color: var(--bg-alt); padding: 1.5rem; border-left: 4px solid var(--accent); border-radius: 4px; margin-bottom: 2rem; margin-top: 1rem;">
+                    <p style="margin-bottom: 0; color: var(--text-main);"> Traditional Modern Portfolio Theory (MPT) relies on static historical data, failing catastrophically during volatility clustering when asset correlations mathematically converge to 1. Bluewolf Analytica’s Strategy Swarm abandons static parameters. By modeling asset prices via continuous-time stochastic differential equations, our agents continuously inject real-time, predictive "Drift" (<span class="math-inline">μ<sub>t</sub></span>) into the Markowitz formulation. Furthermore, the system autonomously identifies and constructs mathematically orthogonal synthetic assets, enforcing zero-covariance states to dynamically push the Efficient Frontier outward regardless of macro-market regimes.</p>
+                </div>
+
+                <h3 style="margin-bottom: 1rem; margin-top: 2rem; border-bottom: 1px solid #EAEAEA; padding-bottom: 0.5rem;">The Breakdown of Static Covariance Matrices</h3>
+                <p>In standard Mean-Variance Optimization (MVO), the objective is to determine a vector of weights <span class="math-inline">w</span> that maximizes expected return for a given level of risk penalty <span class="math-inline">λ</span>:</p>
+                
+                <div class="math-block">
+                    max [ w<sup>T</sup> μ - (λ / 2) w<sup>T</sup> Σ w ]
+                </div>
+
+                <p>The flaw is that both the expected return vector <span class="math-inline">μ</span> and the covariance matrix <span class="math-inline">Σ</span> are fundamentally non-stationary. During a liquidity crisis, a matrix composed of supposedly diversified assets experiences sudden, severe multi-collinearity. To an algorithmic system, diversification vanishes precisely when it is needed most.</p>
+                
+                <h3 style="margin-bottom: 1rem; margin-top: 2rem; border-bottom: 1px solid #EAEAEA; padding-bottom: 0.5rem;">Injecting Agent-Predicted Stochastic Drift (μ<sub>t</sub>)</h3>
+                <p>Instead of relying on historical look-back periods, our Discovery Agents frame asset trajectories as continuous-time processes driven by Geometric Brownian Motion, guided by Ito's Lemma:</p>
+
+                <div class="math-block">
+                    dS<sub>t</sub> = μ(t, X<sub>t</sub>) S<sub>t</sub> dt + σ(t, X<sub>t</sub>) S<sub>t</sub> dW<sub>t</sub>
+                </div>
+
+                <p>Our LLM-based parsing agents constantly observe a high-dimensional hidden state vector <span class="math-inline">X<sub>t</sub></span>. This allows the Strategy Agent to solve for a *forward-looking* <span class="math-inline">μ<sub>t</sub></span> in real-time, updating the optimization objective function every millisecond.</p>
+
+                <h3 style="margin-bottom: 1rem; margin-top: 2rem; border-bottom: 1px solid #EAEAEA; padding-bottom: 0.5rem;">Forcing Uncorrelated States: Orthogonal Synthetic Assets</h3>
+                <p>To survive correlation-convergence events, Bluewolf agents apply Eigen-decomposition to the dynamic covariance matrix <span class="math-inline">Σ<sub>t</sub></span> to locate principal portfolios:</p>
+
+                <div class="math-block">
+                    Σ<sub>t</sub> = Q Λ Q<sup>-1</sup>
+                </div>
+
+                <p>By transforming the asset space via the eigenvector matrix <span class="math-inline">Q</span>, the system isolates "Eigen-assets"—linear combinations of underlying equities that possess strictly zero covariance (<span class="math-inline">Cov(P<sub>i</sub>, P<sub>j</sub>) = 0</span>). Because human traders cannot natively trade Eigen-assets, our Execution Agents construct synthetic long/short pairs that perfectly mimic these mathematically uncorrelated vectors.</p>
+
+                <div class="chart-container">
+                    <canvas id="frontierChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Biotech / Alt-Data -->
+    <div id="article-3" class="modal-overlay" onclick="closeModalOnOutsideClick(event, 'article-3')">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('article-3')">&times;</button>
+            <div class="modal-body">
+                <span class="tag">Generated by Discovery Agent v3.1 | Alternative Data Division</span>
+                <h2>Predictive Alpha: Scraping Academic Footprints for FDA Trial Outcomes</h2>
+                
+                <div style="background-color: var(--bg-alt); padding: 1.5rem; border-left: 4px solid var(--accent); border-radius: 4px; margin-bottom: 2rem; margin-top: 1rem;">
+                    <p style="margin-bottom: 0; color: var(--text-main);">Traditional biotech analysts attempt to predict Phase 3 FDA trial results by scrutinizing historical Phase 2 efficacy data—an inherently crowded and perfectly-priced trade. Bluewolf Analytica circumvents clinical data entirely. By deploying autonomous agents to scrape the digital, behavioral, and academic footprints of the Principal Investigators (PIs) and laboratory statisticians involved in the trial, our models successfully predict FDA readout outcomes up to 60 days before the public press release, achieving a 94% historical accuracy rate.</p>
+                </div>
+
+                <h3 style="margin-bottom: 1rem; margin-top: 2rem; border-bottom: 1px solid #EAEAEA; padding-bottom: 0.5rem;">The Edge: Behavioral Footprinting</h3>
+                <p>Inside any biotech firm, the raw clinical data is strictly embargoed. However, the <em>human behavior</em> of those who have seen the data is not. By parsing non-standard metadata, our Discovery Agents isolate "tells" that indicate whether the researchers are preparing for a blockbuster commercial launch or a catastrophic trial failure.</p>
+                
+                <ul>
+                    <li style="margin-left: 20px; margin-bottom:10px; color: #555;"><strong>Vector 1 (Bioinformatics Repositories):</strong> Our agents monitor commit frequencies on public/semi-private GitHub repositories associated with the university labs running the trials. A sudden cessation of statistical modeling activity 45 days prior to a readout historically correlates with a locked, failed dataset (Negative Alpha).</li>
+                    <li style="margin-left: 20px; margin-bottom:10px; color: #555;"><strong>Vector 2 (Academic Mobility):</strong> Parsing faculty hiring boards and LinkedIn data. If post-doctoral researchers attached to a Phase 3 trial suddenly accept external academic positions weeks before a readout, it suggests the internal project funding is expected to evaporate (Negative Alpha).</li>
+                    <li style="margin-left: 20px; margin-bottom:10px; color: #555;"><strong>Vector 3 (Pre-Print Embargoes & IP):</strong> Rapid filings of highly specific "continuation patents" by the lead PI regarding manufacturing processes—while simultaneously enforcing a strict radio-silence on pre-print servers like bioRxiv—indicates preparation for commercialization of a successful drug (Positive Alpha).</li>
+                </ul>
+
+                <h3 style="margin-bottom: 1rem; margin-top: 2rem; border-bottom: 1px solid #EAEAEA; padding-bottom: 0.5rem;">Case Study: Aethelion Therapeutics (ATHN)</h3>
+                <p>In Q2 2026, the market priced Aethelion Therapeutics' (ATHN) Phase 3 Alzheimer's trial at a meager 30% probability of success based on mixed historical efficacy. However, Bluewolf agents detected extreme behavioral anomalies starting at T-minus 60 days:</p>
+                
+                <p>1. The lead biostatistician filed an urgent continuation patent concerning large-scale peptide synthesis.<br>
+                   2. The primary research facility executed a massive uptick in cloud-compute spending on AWS (detected via server-node scraping), indicating final-stage regulatory formatting.<br>
+                   3. Two executive-linked private jets made uncharacteristic, repeated trips to Silver Spring, MD (FDA Headquarters).</p>
+
+                <p>The system autonomously raised the Conviction Score to 92%, overriding the market consensus and initiating a highly leveraged, long-dated call option strategy just prior to the positive readout.</p>
+
+                <div class="chart-container">
+                    <canvas id="biotechChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         JAVASCRIPT FOR MODALS, CHARTS, & ANIMATIONS
+         ========================================== -->
+    <script>
+        // --- MODAL LOGIC ---
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.body.classList.add('modal-open');
+            window.dispatchEvent(new Event('resize'));
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.classList.remove('modal-open');
+        }
+
+        function closeModalOnOutsideClick(event, modalId) {
+            if (event.target.id === modalId) {
+                closeModal(modalId);
+            }
+        }
+
+        // --- SCROLL REVEAL ANIMATION (ARCHITECTURE SECTION) ---
+        // This triggers the fade-up effect as the user scrolls down
+        const observerOptions = {
+            threshold: 0.2 // Trigger when 20% of the element is visible
+        };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    // Optional: stop observing once revealed so it doesn't animate again
+                    // observer.unobserve(entry.target); 
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.timeline-block').forEach(block => {
+            observer.observe(block);
+        });
+
+        // --- CHART.JS INITIALIZATION ---
+        
+        // 1. Sector Impact Bar Chart (Report 1)
+        const ctxSector = document.getElementById('sectorChart').getContext('2d');
+        new Chart(ctxSector, {
+            type: 'bar',
+            data: {
+                labels: ['Energy Producers (E&P)', 'Defense & Aerospace', 'Maritime Insurance', 'LNG Exporters', 'Consumer Discretionary', 'Chemicals & Fertilizers', 'Global Logistics', 'Airlines'],
+                datasets: [{
+                    label: 'Agent Conviction Impact Score',
+                    data: [10, 8, 7, 6, -6, -7, -8, -9],
+                    backgroundColor: function(context) {
+                        return context.dataset.data[context.dataIndex] > 0 ? 'rgba(12, 186, 186, 0.85)' : 'rgba(239, 68, 68, 0.85)';
+                    },
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true, maintainAspectRatio: false,
+                plugins: { title: { display: true, text: 'Sector Impact Scorecard', font: { size: 16 } }, legend: { display: false } }
+            }
+        });
+
+        // 2. Oil Price Scenarios Line Chart (Report 1)
+        const ctxHormuz = document.getElementById('hormuzChart').getContext('2d');
+        new Chart(ctxHormuz, {
+            type: 'line',
+            data: {
+                labels: ['Pre-Shock', 'Week 1', 'Week 4', 'Month 3', 'Month 6', 'Month 12'],
+                datasets: [
+                    { label: 'Base Case', data: [80, 125, 138, 120, 106, 85], borderColor: '#0CBABA', backgroundColor: 'rgba(12, 186, 186, 0.1)', borderWidth: 3, fill: true, tension: 0.4 },
+                    { label: 'Escalation', data: [80, 130, 160, 175, 150, 130], borderColor: '#EF4444', borderWidth: 2, tension: 0.4 }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // 3. Dynamic Efficient Frontier Scatter/Line Chart (Report 2)
+        const ctxFrontier = document.getElementById('frontierChart').getContext('2d');
+        new Chart(ctxFrontier, {
+            type: 'scatter',
+            data: {
+                datasets: [
+                    { type: 'line', label: 'Standard Markowitz Frontier (Static)', data: [{x: 5, y: 3}, {x: 8, y: 5.5}, {x: 12, y: 7.5}, {x: 16, y: 9}, {x: 20, y: 10}], borderColor: '#9CA3AF', borderWidth: 2, borderDash: [5, 5], fill: false, tension: 0.4, showLine: true, pointRadius: 0 },
+                    { type: 'line', label: 'Bluewolf Dynamic Frontier', data: [{x: 3, y: 5}, {x: 6, y: 9}, {x: 10, y: 12}, {x: 14, y: 14.5}, {x: 18, y: 16}], borderColor: '#0CBABA', backgroundColor: 'rgba(12, 186, 186, 0.1)', borderWidth: 3, fill: '-1', tension: 0.4, showLine: true, pointRadius: 4, pointBackgroundColor: '#0CBABA' },
+                    { type: 'scatter', label: 'Orthogonal Eigen-Assets', data: [{x: 4, y: 8}, {x: 7, y: 11}, {x: 12, y: 13.5}], backgroundColor: '#1A1A1A', pointStyle: 'rectRot', pointRadius: 6 }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { x: { title: { display: true, text: 'Portfolio Risk (σ)' } }, y: { title: { display: true, text: 'Expected Return (μ)' } } } }
+        });
+
+        // 4. Biotech FDA Prediction Dual-Axis Line Chart (Report 3)
+        const ctxBiotech = document.getElementById('biotechChart').getContext('2d');
+        new Chart(ctxBiotech, {
+            type: 'line',
+            data: {
+                labels: ['T-90 Days', 'T-60 Days', 'T-45 Days', 'T-30 Days', 'T-15 Days', 'FDA Readout'],
+                datasets: [
+                    { label: 'Market Implied Probability of Success (%)', data: [30, 31, 28, 30, 32, 100], borderColor: '#9CA3AF', borderWidth: 2, borderDash: [5, 5], tension: 0.3 },
+                    { label: 'Bluewolf Agent Conviction Score (%)', data: [30, 45, 68, 85, 92, 100], borderColor: '#0CBABA', backgroundColor: 'rgba(12, 186, 186, 0.1)', borderWidth: 3, fill: true, tension: 0.4 }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { title: { display: true, text: 'Probability (%)' }, min: 0, max: 100 } } }
+        });
+
+        // --- DYNAMIC HERO BACKGROUND (CANVAS AI SWARM) ---
+        const canvas = document.getElementById('hero-canvas');
+        const ctx = canvas.getContext('2d');
+        let particlesArray = [];
+        const heroSection = document.getElementById('hero-section');
+
+        // Set Canvas to Hero Section Size
+        canvas.width = heroSection.offsetWidth;
+        canvas.height = heroSection.offsetHeight;
+
+        let mouse = {
+            x: null,
+            y: null,
+            radius: (canvas.height / 80) * (canvas.width / 80)
+        }
+
+        // Track mouse position over the hero section
+        heroSection.addEventListener('mousemove', function(event) {
+            mouse.x = event.x;
+            mouse.y = event.y - heroSection.getBoundingClientRect().top; // Adjust for scroll
+        });
+
+        // Remove mouse interaction when leaving hero section
+        heroSection.addEventListener('mouseout', function() {
+            mouse.x = undefined;
+            mouse.y = undefined;
+        });
+
+        // Handle Window Resize
+        window.addEventListener('resize', function() {
+            canvas.width = heroSection.offsetWidth;
+            canvas.height = heroSection.offsetHeight;
+            mouse.radius = (canvas.height / 80) * (canvas.width / 80);
+            init(); // Re-initialize particles on resize
+        });
+
+        // Particle Class
+        class Particle {
+            constructor(x, y, directionX, directionY, size, color) {
+                this.x = x;
+                this.y = y;
+                this.directionX = directionX;
+                this.directionY = directionY;
+                this.size = size;
+                this.color = color;
+            }
+            
+            // Draw individual particle
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+            
+            // Check particle position, mouse position, move particle, draw
+            update() {
+                // Bounce off edges
+                if (this.x > canvas.width || this.x < 0) {
+                    this.directionX = -this.directionX;
+                }
+                if (this.y > canvas.height || this.y < 0) {
+                    this.directionY = -this.directionY;
+                }
+
+                // Move particle
+                this.x += this.directionX;
+                this.y += this.directionY;
+                this.draw();
+            }
+        }
+
+        // Create particle array
+        function init() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.height * canvas.width) / 12000; // Density
+            
+            // Limit max particles to keep performance high
+            if (numberOfParticles > 100) numberOfParticles = 100;
+
+            for (let i = 0; i < numberOfParticles; i++) {
+                let size = (Math.random() * 2) + 1; // Size of dots
+                let x = (Math.random() * ((canvas.width - size * 2) - (size * 2)) + size * 2);
+                let y = (Math.random() * ((canvas.height - size * 2) - (size * 2)) + size * 2);
+                
+                // Extremely slow drift
+                let directionX = (Math.random() * 0.4) - 0.2; 
+                let directionY = (Math.random() * 0.4) - 0.2;
+                
+                let color = 'rgba(12, 186, 186, 0.6)'; // Turquoise dots
+                
+                particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+            }
+        }
+
+        // Connect particles with lines
+        function connect() {
+            let opacityValue = 1;
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x))
+                                 + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                    
+                    if (distance < (canvas.width / 10) * (canvas.height / 10)) {
+                        opacityValue = 1 - (distance / 20000);
+                        // Faint blue/grey connecting lines
+                        ctx.strokeStyle = 'rgba(107, 174, 214,' + opacityValue + ')'; 
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+                
+                // Connect particles to mouse if mouse is present
+                if(mouse.x && mouse.y) {
+                    let mouseDistance = ((particlesArray[a].x - mouse.x) * (particlesArray[a].x - mouse.x))
+                                      + ((particlesArray[a].y - mouse.y) * (particlesArray[a].y - mouse.y));
+                    
+                    if (mouseDistance < 25000) {
+                        ctx.strokeStyle = 'rgba(12, 186, 186,' + (1 - (mouseDistance/25000)) + ')'; // Mouse connects with turquoise line
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(mouse.x, mouse.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+            }
+            connect();
+        }
+
+        // Start Animation
+        init();
+        animate();
+
+    </script>
+</body>
+</html>
